@@ -74,7 +74,7 @@ Variable 4 — EKS Node Instance Type
 variable "eks_node_instance_type" {
   description = "EC2 instance type for EKS worker nodes"
   type = string
-  default = "t3.medium"
+  default = "t2.micro"
 }
 /*=====================================================================================================
 Tells Terraform:  what size EC2 machines to use as K8s worker nodes

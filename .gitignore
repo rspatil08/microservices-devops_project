@@ -1,28 +1,15 @@
-.DS_Store
-.eclipse.buildship.core.prefs
-.gradle/
-.idea/
-.kubernetes-manifests-*/
-.project
-.skaffold-*.yaml
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars.backup
 .terraform.lock.hcl
-.terraform/*
-.venv/
-.vs/
-.vscode/
-*.iml
-*.ipr
-*.iws
-*.pyc
-*.swp
-*.tfstate*
-*.tfvars
-*~
-bin/
-build/
-Dockerfile.pip
-node_modules/
-obj/
-pkg/
-release/wi-kubernetes-manifests.yaml
-vendor/
+crash.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jenkins
+*.pem
+*.key

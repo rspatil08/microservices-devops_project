@@ -1,0 +1,9 @@
+aws_region = "eu-north-1"
+project_name = "microservices-demo"
+eks_cluster_name = "devops-demo"
+eks_node_instance_type = "t2.micro"
+eks_desired_nodes = 2
+eks_min_nodes = 1
+eks_max_nodes = 3
+jenkins_instance_type = "t3.medium"
+jenkins_key_name = "jenkins-key"
