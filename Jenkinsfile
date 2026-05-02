@@ -58,6 +58,15 @@ pipeline {
             steps {
                 script {
                     sh "aws eks update-kubeconfig --name ${EKS_CLUSTER} --region ${AWS_REGION}"
+
+                    def services = [
+                        'frontend', 'adservice', 'checkoutservice',
+                        'currencyservice', 'emailservice', 'loadgenerator',
+                        'paymentservice', 'productcatalogservice', 'recommendationservice',
+                        'shippingservice', 'shoppingassistantservice'
+                    ]
+
+                    // Apply manifests first
                     sh """
                         for f in kubernetes-manifests/*.yaml; do
                             if [ "\$(basename \$f)" != "kustomization.yaml" ]; then
@@ -65,6 +74,20 @@ pipeline {
                             fi
                         done
                     """
+
+                    // Update each deployment to use YOUR ECR images
+                    services.each { svc ->
+                        sh """
+                            kubectl set image deployment/${svc} \
+                                server=${ECR_REGISTRY}/${svc}:${env.BUILD_NUMBER} \
+                                --namespace=default \
+                                --ignore-not-found=true 2>/dev/null || \
+                            kubectl set image deployment/${svc} \
+                                ${svc}=${ECR_REGISTRY}/${svc}:${env.BUILD_NUMBER} \
+                                --namespace=default \
+                                --ignore-not-found=true
+                        """
+                    }
                 }
             }
         }
