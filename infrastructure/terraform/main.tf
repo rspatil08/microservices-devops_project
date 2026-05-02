@@ -73,6 +73,29 @@ Why useful:      AMI IDs change per region and get updated
                  this finds the right one automatically
 =======================================================================================================*/
 
+# ── FETCH EKSCTL VPC AUTOMATICALLY ───────────────────────────────
+data "aws_vpc" "eks" {
+  tags = {
+    "alpha.eksctl.io/cluster-name" = var.eks_cluster_name
+  }
+}
+
+data "aws_subnets" "eks_public" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.eks.id]
+  }
+
+  filter {
+    name   = "map-public-ip-on-launch"
+    values = ["true"]
+  }
+
+  tags = {
+    "alpha.eksctl.io/cluster-name" = var.eks_cluster_name
+  }
+}
+
 /*=============================
 Section 3 — ECR Repositories
 ===============================*/
@@ -302,76 +325,13 @@ ________________________________________________________________________________
 
 =======================================================================================================*/
 
-/*=============================
-Section 6 — EKS Cluster
-===============================*/
-resource "aws_eks_cluster" "main" {
-    name = var.eks_cluster_name
-    role_arn = aws_iam_role.eks_cluster.arn
-    version = "1.31"
-
-    vpc_config {
-      subnet_ids = aws_subnet.public[*].id
-    }
-
-    depends_on = [ 
-        aws_iam_role_policy_attachment.eks_cluster_policy
-     ]
-}
-/*=====================================================================================================
-name:        "devops-demo" from your tfvars
-role_arn:    attaches the IAM role we created above
-version:     Kubernetes version 1.31 (stable, recent)
-vpc_config:  puts the cluster inside your VPC
-             [*] means both subnets
-
-depends_on:  very important —
-             tells Terraform "don't create the EKS cluster
-             until the IAM role policy is attached"
-             without this, cluster creation might fail
-             because permissions aren't ready yet
-=======================================================================================================*/
-resource "aws_eks_node_group" "workers" {
-  cluster_name   = aws_eks_cluster.main.name
-  node_group_name = "${var.project_name}-workers"
-  node_role_arn = aws_iam_role.eks_nodes.arn
-  subnet_ids = aws_subnet.public[*].id
-  instance_types = [var.eks_node_instance_type]
-
-  scaling_config {
-    desired_size = var.eks_desired_nodes
-    min_size     = var.eks_min_nodes
-    max_size     = var.eks_max_nodes
-  }
-
-  depends_on = [ 
-    aws_iam_role_policy_attachment.eks_worker_node_policy,
-    aws_iam_role_policy_attachment.eks_cni_policy,
-    aws_iam_role_policy_attachment.eks_ecr_policy
-   ]
-}
-/*=====================================================================================================
-What it means:   creates the actual EC2 machines that
-                 run your microservice pods
-
-cluster_name:    attaches these nodes to your EKS cluster
-instance_types:  t3.medium from your tfvars
-scaling_config:  desired=2, min=1, max=3 from your tfvars
-
-Think of EKS cluster vs node group:
-  EKS cluster    =  the Kubernetes control plane
-                    (the brain — manages everything)
-  Node group     =  the worker machines
-                    (the muscles — actually run your pods)
-=======================================================================================================*/
-
 /*=======================================
 Section 7 — Security Group for Jenkins
 =========================================*/
 resource "aws_security_group" "jenkins" {
     name = "${var.project_name}-jenkins-sg"
     description = "Security group for Jenkins server"
-    vpc_id = aws_vpc.main.id
+    vpc_id      = data.aws_vpc.eks.id 
     
     ingress {
         from_port = 22
@@ -426,7 +386,7 @@ Section 8 — EC2 for Jenkins
 resource "aws_instance" "jenkins" {
     ami = data.aws_ami.ubuntu.id
     instance_type = var.jenkins_instance_type
-    subnet_id = aws_subnet.public[0].id
+    subnet_id = data.aws_subnets.eks_public.ids[0]
     vpc_security_group_ids = [aws_security_group.jenkins.id]
     iam_instance_profile = aws_iam_instance_profile.jenkins.name
     key_name = var.jenkins_key_name

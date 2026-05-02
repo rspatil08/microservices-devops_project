@@ -6,16 +6,6 @@ output "ecr_repository_urls" {
   }
 }
 
-output "eks_cluster_name" {
-  description = "EKS cluster name"
-  value       = aws_eks_cluster.main.name
-}
-
-output "eks_cluster_endpoint" {
-  description = "EKS cluster endpoint"
-  value       = aws_eks_cluster.main.endpoint
-}
-
 output "jenkins_public_ip" {
   description = "Jenkins server public IP"
   value       = aws_instance.jenkins.public_ip
@@ -29,4 +19,14 @@ output "jenkins_url" {
 output "aws_account_id" {
   description = "AWS Account ID"
   value       = data.aws_caller_identity.current.account_id
+}
+
+output "eks_vpc_id" {
+  description = "eksctl VPC ID"
+  value       = data.aws_vpc.eks.id
+}
+
+output "eks_public_subnets" {
+  description = "eksctl public subnet IDs"
+  value       = data.aws_subnets.eks_public.ids
 }

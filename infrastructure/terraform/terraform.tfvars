@@ -5,5 +5,5 @@ eks_desired_nodes = 2
 eks_min_nodes = 1
 eks_max_nodes = 3
 eks_node_instance_type = "t3.small"
-jenkins_instance_type  = "t2.micro"
+jenkins_instance_type  = "t3.micro"
 jenkins_key_name = "jenkins-key"
