@@ -42,7 +42,7 @@ spec:
                 - ALL
             privileged: false
             readOnlyRootFilesystem: true
-          image: checkoutservice
+          image: 552357224711.dkr.ecr.eu-north-1.amazonaws.com/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:

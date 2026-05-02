@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: emailservice
+        image: 552357224711.dkr.ecr.eu-north-1.amazonaws.com/emailservice:latest
         ports:
         - containerPort: 8080
         env:
