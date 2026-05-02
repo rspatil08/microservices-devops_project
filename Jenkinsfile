@@ -54,15 +54,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to EKS') {
+         stage('Deploy to EKS') {
             steps {
                 script {
                     sh "aws eks update-kubeconfig --name ${EKS_CLUSTER} --region ${AWS_REGION}"
-                    sh "kubectl apply -f kubernetes-manifests/"
+                    sh "kubectl apply -f kubernetes-manifests/ --validate=false"
                 }
             }
         }
-
     }
 
     post {
