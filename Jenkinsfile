@@ -21,7 +21,7 @@ pipeline {
             steps {
                 script {
                     def services = [
-                        'frontend', 'cartservice', 'productcatalogservice',
+                        'frontend', 'shoppingassistantservice', 'productcatalogservice',
                         'currencyservice', 'paymentservice', 'shippingservice',
                         'emailservice', 'checkoutservice', 'recommendationservice',
                         'adservice', 'loadgenerator'
@@ -39,7 +39,7 @@ pipeline {
                     sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
 
                     def services = [
-                        'frontend', 'cartservice', 'productcatalogservice',
+                        'frontend', 'shoppingassistantservice', 'productcatalogservice',
                         'currencyservice', 'paymentservice', 'shippingservice',
                         'emailservice', 'checkoutservice', 'recommendationservice',
                         'adservice', 'loadgenerator'
