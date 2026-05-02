@@ -54,11 +54,17 @@ pipeline {
             }
         }
 
-         stage('Deploy to EKS') {
+        stage('Deploy to EKS') {
             steps {
                 script {
                     sh "aws eks update-kubeconfig --name ${EKS_CLUSTER} --region ${AWS_REGION}"
-                    sh "kubectl apply -f kubernetes-manifests/ --validate=false"
+                    sh """
+                        for f in kubernetes-manifests/*.yaml; do
+                            if [ "\$(basename \$f)" != "kustomization.yaml" ]; then
+                                kubectl apply -f \$f --validate=false
+                            fi
+                        done
+                    """
                 }
             }
         }
