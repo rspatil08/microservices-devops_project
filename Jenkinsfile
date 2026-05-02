@@ -26,7 +26,8 @@ pipeline {
                         sh "docker build -t frontend:${env.BUILD_NUMBER} ./src/frontend"
                     }
                 }
-                stage('cartservice') {
+
+                /*stage('cartservice') {
                     steps {
                         sh "docker build -t cartservice:${env.BUILD_NUMBER} ./src/cartservice"
                     }
@@ -119,7 +120,7 @@ pipeline {
                 }
             }
         }
-    }
+    }*/
 
     post {
         success {
