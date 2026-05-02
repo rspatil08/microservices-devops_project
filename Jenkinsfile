@@ -9,7 +9,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout- 1') {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-credentials',
