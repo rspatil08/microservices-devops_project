@@ -154,7 +154,7 @@ variable "services" {
   type = list(string)
   default = [ 
     "frontend",
-    "cartservice",
+    "shoppingassistantservice",
     "productcatalogservice",
     "currencyservice",
     "paymentservice",
