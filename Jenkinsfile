@@ -138,11 +138,13 @@ pipeline {
         }
     }
 
-    post {
+post {
         always {
-            sh '''
-                docker rmi $(docker images -q --filter "dangling=true") 2>/dev/null || true
-            '''
+            node('built-in') {
+                sh '''
+                    docker rmi $(docker images -q --filter "dangling=true") 2>/dev/null || true
+                '''
+            }
         }
         success {
             echo 'Pipeline completed successfully!'
@@ -151,4 +153,3 @@ pipeline {
             echo 'Pipeline failed — check the stage logs above.'
         }
     }
-}
