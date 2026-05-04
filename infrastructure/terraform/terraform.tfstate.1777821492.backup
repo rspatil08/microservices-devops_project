@@ -1,0 +1,166 @@
+{
+  "version": 4,
+  "terraform_version": "1.14.3",
+  "serial": 360,
+  "lineage": "ebf7209d-12c7-bcd8-cdf2-85cf5ef7b3b1",
+  "outputs": {},
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "aws_ecr_repository",
+      "name": "services",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "index_key": "paymentservice",
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecr:eu-north-1:552357224711:repository/paymentservice",
+            "encryption_configuration": [
+              {
+                "encryption_type": "AES256",
+                "kms_key": ""
+              }
+            ],
+            "force_delete": null,
+            "id": "paymentservice",
+            "image_scanning_configuration": [
+              {
+                "scan_on_push": true
+              }
+            ],
+            "image_tag_mutability": "MUTABLE",
+            "image_tag_mutability_exclusion_filter": [],
+            "name": "paymentservice",
+            "region": "eu-north-1",
+            "registry_id": "552357224711",
+            "repository_url": "552357224711.dkr.ecr.eu-north-1.amazonaws.com/paymentservice",
+            "tags": {},
+            "tags_all": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "552357224711",
+            "name": "paymentservice",
+            "region": "eu-north-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "productcatalogservice",
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecr:eu-north-1:552357224711:repository/productcatalogservice",
+            "encryption_configuration": [
+              {
+                "encryption_type": "AES256",
+                "kms_key": ""
+              }
+            ],
+            "force_delete": null,
+            "id": "productcatalogservice",
+            "image_scanning_configuration": [
+              {
+                "scan_on_push": true
+              }
+            ],
+            "image_tag_mutability": "MUTABLE",
+            "image_tag_mutability_exclusion_filter": [],
+            "name": "productcatalogservice",
+            "region": "eu-north-1",
+            "registry_id": "552357224711",
+            "repository_url": "552357224711.dkr.ecr.eu-north-1.amazonaws.com/productcatalogservice",
+            "tags": {},
+            "tags_all": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "552357224711",
+            "name": "productcatalogservice",
+            "region": "eu-north-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "recommendationservice",
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecr:eu-north-1:552357224711:repository/recommendationservice",
+            "encryption_configuration": [
+              {
+                "encryption_type": "AES256",
+                "kms_key": ""
+              }
+            ],
+            "force_delete": null,
+            "id": "recommendationservice",
+            "image_scanning_configuration": [
+              {
+                "scan_on_push": true
+              }
+            ],
+            "image_tag_mutability": "MUTABLE",
+            "image_tag_mutability_exclusion_filter": [],
+            "name": "recommendationservice",
+            "region": "eu-north-1",
+            "registry_id": "552357224711",
+            "repository_url": "552357224711.dkr.ecr.eu-north-1.amazonaws.com/recommendationservice",
+            "tags": {},
+            "tags_all": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "552357224711",
+            "name": "recommendationservice",
+            "region": "eu-north-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        },
+        {
+          "index_key": "shippingservice",
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecr:eu-north-1:552357224711:repository/shippingservice",
+            "encryption_configuration": [
+              {
+                "encryption_type": "AES256",
+                "kms_key": ""
+              }
+            ],
+            "force_delete": null,
+            "id": "shippingservice",
+            "image_scanning_configuration": [
+              {
+                "scan_on_push": true
+              }
+            ],
+            "image_tag_mutability": "MUTABLE",
+            "image_tag_mutability_exclusion_filter": [],
+            "name": "shippingservice",
+            "region": "eu-north-1",
+            "registry_id": "552357224711",
+            "repository_url": "552357224711.dkr.ecr.eu-north-1.amazonaws.com/shippingservice",
+            "tags": {},
+            "tags_all": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "552357224711",
+            "name": "shippingservice",
+            "region": "eu-north-1"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiZGVsZXRlIjoxMjAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

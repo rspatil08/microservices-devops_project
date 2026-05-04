@@ -1,171 +1,389 @@
-<!-- <p align="center">
-<img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
-</p> -->
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
+# Microservices DevOps Pipeline on AWS
 
-**Online Boutique** is a cloud-first microservices demo application.  The application is a
-web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+End-to-end DevOps pipeline for deploying a cloud-native microservices e-commerce application on AWS — fully automated from code push to live deployment using Jenkins, Terraform, Kubernetes, Prometheus, and Grafana.
 
-Google uses this application to demonstrate how developers can modernize enterprise applications using Google Cloud products, including: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine), [Cloud Service Mesh (CSM)](https://cloud.google.com/service-mesh), [gRPC](https://grpc.io/), [Cloud Operations](https://cloud.google.com/products/operations), [Spanner](https://cloud.google.com/spanner), [Memorystore](https://cloud.google.com/memorystore), [AlloyDB](https://cloud.google.com/alloydb), and [Gemini](https://ai.google.dev/). This application works on any Kubernetes cluster.
+---
 
-If you’re using this demo, please **★Star** this repository to show your interest!
+## 📋 Table of Contents
+- [Project Overview](#project-overview)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Application — Online Boutique](#application)
+- [What I Built as DevOps Engineer](#what-i-built)
+- [CI/CD Pipeline Flow](#cicd-pipeline)
+- [Infrastructure Details](#infrastructure)
+- [Monitoring](#monitoring)
+- [Project Structure](#project-structure)
+- [Screenshots](#screenshots)
+- [How to Deploy](#how-to-deploy)
+- [Cost Estimate](#cost-estimate)
+- [Author](#author)
 
-**Note to Googlers:** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
+---
 
-## Architecture
+## 📌 Project Overview <a name="project-overview"></a>
 
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
+This project demonstrates a complete DevOps workflow:
 
-[![Architecture of
-microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+- A **cloud-native e-commerce application** with 11 microservices is containerized and deployed on AWS
+- Every `git push` automatically triggers a **Jenkins CI/CD pipeline**
+- All AWS infrastructure is provisioned using **Terraform** as code
+- Application runs on **AWS EKS** (Kubernetes) with zero-downtime deployments
+- System health monitored in real-time via **Prometheus and Grafana**
 
-Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
+> **Note:** The application code (Online Boutique) was developed by Google. My contribution was building the complete DevOps infrastructure, CI/CD pipeline, and monitoring stack around it.
 
-| Service                                              | Language      | Description                                                                                                                       |
-| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](/src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](/src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
-| [productcatalogservice](/src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
-| [currencyservice](/src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](/src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
-| [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
-| [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
-| [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
-| [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
+---
 
-## Screenshots
+## 🏗️ Architecture <a name="architecture"></a>
 
-| Home Page                                                                                                         | Checkout Screen                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
+### Application Architecture
+[![Architecture of microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
 
-## Quickstart (GKE)
+### DevOps Pipeline Architecture
+Developer
+│
+│  git push
+▼
+GitHub Repository
+│
+│  webhook trigger (automatic)
+▼
+Jenkins CI/CD (AWS EC2 t3.micro)
+│
+├── Stage 1: Checkout code
+├── Stage 2: Build Docker images (11 services)
+├── Stage 3: Push to AWS ECR
+└── Stage 4: Deploy to AWS EKS
+│
+▼
+AWS EKS Kubernetes Cluster
+├── 2 × t3.small worker nodes
+├── 12 pods running
+└── LoadBalancer → public access
+│
+▼
+Prometheus + Grafana
+└── CPU, Memory, Disk, Network monitoring
 
-1. Ensure you have the following requirements:
-   - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
-   - Shell environment with `gcloud`, `git`, and `kubectl`.
+---
 
-2. Clone the latest major version.
+## 🛠️ Tech Stack <a name="tech-stack"></a>
 
-   ```sh
-   git clone --depth 1 --branch v0 https://github.com/GoogleCloudPlatform/microservices-demo.git
-   cd microservices-demo/
-   ```
+| Category | Tool | Purpose |
+|---|---|---|
+| Version Control | GitHub | Source code + webhook trigger |
+| CI/CD | Jenkins | Automated build and deploy |
+| Containerization | Docker | Package each microservice |
+| Container Registry | AWS ECR | Store Docker images |
+| Orchestration | AWS EKS | Kubernetes cluster |
+| Infrastructure as Code | Terraform | Provision AWS resources |
+| Cluster Management | eksctl | Create and manage EKS |
+| Monitoring | Prometheus | Collect system metrics |
+| Dashboards | Grafana | Visualize metrics and alerts |
+| In-memory Cache | Redis | Shopping cart storage |
+---
 
-   The `--depth 1` argument skips downloading git history.
+## 🛍️ Application — Online Boutique <a name="application"></a>
 
-3. Set the Google Cloud project and region and ensure the Google Kubernetes Engine API is enabled.
+**Online Boutique** is a cloud-native e-commerce demo application composed of 11 microservices written in different languages that communicate over gRPC.
 
-   ```sh
-   export PROJECT_ID=<PROJECT_ID>
-   export REGION=us-central1
-   gcloud services enable container.googleapis.com \
-     --project=${PROJECT_ID}
-   ```
+| Service | Language | Description |
+|---|---|---|
+| frontend | Go | Serves the website via HTTP |
+| cartservice | C# | Stores shopping cart items in Redis |
+| productcatalogservice | Go | Product listings from JSON file |
+| currencyservice | Node.js | Currency conversion using ECB rates |
+| paymentservice | Node.js | Mock credit card payment processing |
+| shippingservice | Go | Mock shipping cost estimation |
+| emailservice | Python | Mock order confirmation emails |
+| checkoutservice | Go | Orchestrates payment, shipping, email |
+| recommendationservice | Python | Product recommendations |
+| adservice | Java | Contextual text advertisements |
+| loadgenerator | Python/Locust | Synthetic traffic generation |
 
-   Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
+| Home Page | Checkout Screen |
+|---|---|
+| [![Home](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Checkout](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
-4. Create a GKE cluster and get the credentials for it.
+---
 
-   ```sh
-   gcloud container clusters create-auto online-boutique \
-     --project=${PROJECT_ID} --region=${REGION}
-   ```
+## 👩‍💻 What I Built as DevOps Engineer <a name="what-i-built"></a>
 
-   Creating the cluster may take a few minutes.
+### 1. AWS Infrastructure (Terraform)
+- VPC with public subnets across 2 availability zones
+- 11 AWS ECR repositories — one per microservice
+- IAM roles and policies for EKS nodes and Jenkins EC2
+- Jenkins EC2 instance with automated software installation via `user_data`
+- Security groups for Jenkins (ports 22 and 8080)
 
-5. Deploy Online Boutique to the cluster.
+### 2. Kubernetes Cluster (eksctl)
+- Managed EKS cluster with 2 t3.small worker nodes
+- Auto-scaling configured — min: 1, max: 3 nodes
+- IAM identity mapping for Jenkins → EKS secure access
 
-   ```sh
-   kubectl apply -f ./release/kubernetes-manifests.yaml
-   ```
+### 3. CI/CD Pipeline (Jenkinsfile)
+- GitHub webhook triggers pipeline automatically on every push
+- Sequential Docker builds for all 11 microservices
+- Images tagged with Jenkins build number for easy rollback
+- Automatic push to AWS ECR with `:latest` and `:build-number` tags
+- Zero-downtime rolling deployment to EKS via `kubectl`
 
-6. Wait for the pods to be ready.
+### 4. Monitoring Stack
+- Prometheus running on Jenkins EC2 as Docker container
+- Node Exporter for system-level metrics collection
+- Grafana dashboards showing CPU, Memory, Disk, Network metrics
+- Alert rule configured for high memory usage (>85%)
 
-   ```sh
-   kubectl get pods
-   ```
+---
 
-   After a few minutes, you should see the Pods in a `Running` state:
+## 🔄 CI/CD Pipeline Flow <a name="cicd-pipeline"></a>
 
-   ```
-   NAME                                     READY   STATUS    RESTARTS   AGE
-   adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-   cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-   checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-   currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-   emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-   frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-   loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-   paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-   productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-   recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-   redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-   shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-   ```
+Developer pushes code to GitHub
+↓
+GitHub webhook triggers Jenkins automatically
+↓
+Jenkins pulls latest code from GitHub
+↓
+Jenkins builds Docker image for each microservice
+(sequential builds to optimize memory on t3.micro)
+↓
+Images pushed to AWS ECR
+Tagged as: frontend:17 and frontend:latest
+↓
+Jenkins connects kubectl to EKS cluster
+↓
+kubectl apply — Kubernetes manifests deployed
+↓
+Rolling update with zero downtime ✅
+↓
+New version live for users
 
-7. Access the web frontend in a browser using the frontend's external IP.
 
-   ```sh
-   kubectl get service frontend-external | awk '{print $4}'
-   ```
+---
 
-   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
+## ☁️ Infrastructure Details <a name="infrastructure"></a>
+Cloud Provider:    AWS (eu-north-1 — Stockholm)
+Jenkins Server:    t3.micro EC2 + 2GB swap space
+EKS Worker Nodes:  2 × t3.small
+ECR Repositories:  11 (one per microservice)
+Networking:        VPC with 2 public subnets across 2 AZs
+IAM:               Separate roles for Jenkins and EKS nodes
 
-8. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
+---
 
-9. Once you are done with it, delete the GKE cluster.
+## 📊 Monitoring <a name="monitoring"></a>
 
-   ```sh
-   gcloud container clusters delete online-boutique \
-     --project=${PROJECT_ID} --region=${REGION}
-   ```
+Prometheus and Grafana run as Docker containers on the Jenkins EC2 instance.
 
-   Deleting the cluster may take a few minutes.
+**Prometheus** scrapes metrics from:
+- Node Exporter (system metrics — CPU, Memory, Disk, Network)
+- Prometheus itself (internal health metrics)
 
-## Additional deployment options
+**Grafana Dashboards imported:**
+- Node Exporter Full (Dashboard ID: 1860) — system metrics
+- Prometheus Stats (Dashboard ID: 3662) — Prometheus internals
 
-- **Terraform**: [See these instructions](/terraform) to learn how to deploy Online Boutique using [Terraform](https://www.terraform.io/intro).
-- **Istio / Cloud Service Mesh**: [See these instructions](/kustomize/components/service-mesh-istio/README.md) to deploy Online Boutique alongside an Istio-backed service mesh.
-- **Non-GKE clusters (Minikube, Kind, etc)**: See the [Development guide](/docs/development-guide.md) to learn how you can deploy Online Boutique on non-GKE clusters.
-- **AI assistant using Gemini**: [See these instructions](/kustomize/components/shopping-assistant/README.md) to deploy a Gemini-powered AI assistant that suggests products to purchase based on an image.
-- **And more**: The [`/kustomize` directory](/kustomize) contains instructions for customizing the deployment of Online Boutique with other variations.
+**Alert configured:**
+- High Memory Alert — triggers when memory usage exceeds 85%
+Access:
+Prometheus → http://<jenkins-ip>:9090
+Grafana    → http://<jenkins-ip>:3000
 
-## Documentation
+---
 
-- [Development](/docs/development-guide.md) to learn how to run and develop this app locally.
+## 📁 Project Structure <a name="project-structure"></a>
+microservices-devops-pipeline/
+│
+├── src/                          ← 11 microservices (application code)
+│   ├── frontend/
+│   │   └── Dockerfile
+│   ├── adservice/
+│   │   └── Dockerfile
+│   └── ... (one folder per service)
+│
+├── kubernetes-manifests/         ← Kubernetes deployment YAMLs
+│   ├── frontend.yaml             ← updated to use AWS ECR images
+│   ├── adservice.yaml
+│   └── ... (one per service)
+│
+├── infrastructure/
+│   └── terraform/
+│       ├── main.tf               ← VPC, ECR, IAM, Jenkins EC2
+│       ├── variables.tf          ← configurable variables
+│       ├── outputs.tf            ← output values after apply
+│       └── terraform.tfvars      ← variable values
+│
+├── screenshots/                  ← project screenshots
+├── monitoring/                   ← Grafana dashboard JSON exports
+├── Jenkinsfile                   ← complete CI/CD pipeline definition
+└── README.md
 
-## Demos featuring Online Boutique
+---
 
-- [Security hardening of the OnlineBoutique sample apps with the Docker Hardened Images (DHI)](https://medium.com/google-cloud/security-hardening-of-the-onlineboutique-sample-apps-with-docker-hardened-images-dhi-ca1fad348343)
-- [alpine, distroless or scratch?](https://medium.com/google-cloud/alpine-distroless-or-scratch-caac35250e0b)
-- [Platform Engineering in action: Deploy the Online Boutique sample apps with Score and Humanitec](https://medium.com/p/d99101001e69)
-- [The new Kubernetes Gateway API with Istio and Anthos Service Mesh (ASM)](https://medium.com/p/9d64c7009cd)
-- [Use Azure Redis Cache with the Online Boutique sample on AKS](https://medium.com/p/981bd98b53f8)
-- [Sail Sharp, 8 tips to optimize and secure your .NET containers for Kubernetes](https://medium.com/p/c68ba253844a)
-- [Deploy multi-region application with Anthos and Google cloud Spanner](https://medium.com/google-cloud/a2ea3493ed0)
-- [Use Google Cloud Memorystore (Redis) with the Online Boutique sample on GKE](https://medium.com/p/82f7879a900d)
-- [Use Helm to simplify the deployment of Online Boutique, with a Service Mesh, GitOps, and more!](https://medium.com/p/246119e46d53)
-- [How to reduce microservices complexity with Apigee and Anthos Service Mesh](https://cloud.google.com/blog/products/application-modernization/api-management-and-service-mesh-go-together)
-- [gRPC health probes with Kubernetes 1.24+](https://medium.com/p/b5bd26253a4c)
-- [Use Google Cloud Spanner with the Online Boutique sample](https://medium.com/p/f7248e077339)
-- [Seamlessly encrypt traffic from any apps in your Mesh to Memorystore (redis)](https://medium.com/google-cloud/64b71969318d)
-- [Strengthen your app's security with Cloud Service Mesh and Anthos Config Management](https://cloud.google.com/service-mesh/docs/strengthen-app-security)
-- [From edge to mesh: Exposing service mesh applications through GKE Ingress](https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress)
-- [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
-- [Deploying the Online Boutique sample application on Cloud Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)
-- [Anthos Service Mesh Workshop: Lab Guide](https://codelabs.developers.google.com/codelabs/anthos-service-mesh-workshop)
-- [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
-- Google Cloud Next'18 SF
-  - [Day 1 Keynote](https://youtu.be/vJ9OaAqfxo4?t=2416) showing GKE On-Prem
-  - [Day 3 Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
-    APM (Tracing, Code Search, Profiler, Google Cloud Build)
-  - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
-- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
-  showing Stackdriver Incident Response Management
-- [Microservices demo showcasing Go Micro](https://github.com/go-micro/demo)
-#Triggering first pipeline
-#Triggering 2nd pipeline
+## 📸 Screenshots <a name="screenshots"></a>
+
+### Jenkins CI/CD Pipeline
+![Jenkins Pipeline](screenshots/jenkins-pipeline.png)
+
+### All Pods Running on EKS
+![Pods Running](screenshots/eks-pods.png)
+
+### Grafana Monitoring Dashboard
+![Grafana](screenshots/grafana-dashboard.png)
+
+### AWS ECR Repositories
+![ECR](screenshots/ecr-repositories.png)
+
+### EKS Cluster
+![EKS](screenshots/eks-cluster.png)
+
+### Live Application
+![Online Boutique](screenshots/online-boutique.png)
+
+---
+
+## 🚀 How to Deploy <a name="how-to-deploy"></a>
+
+### Prerequisites
+```bash
+aws --version        # AWS CLI configured with IAM credentials
+terraform --version  # v1.x+
+eksctl version       # v0.x+
+kubectl version      # v1.x+
+docker --version     # Docker installed
+```
+
+### Step 1 — Provision AWS Infrastructure
+```bash
+cd infrastructure/terraform
+terraform init
+terraform apply
+```
+Creates: VPC, ECR repositories, IAM roles, Jenkins EC2
+
+### Step 2 — Create EKS Cluster
+```bash
+eksctl create cluster \
+  --name devops-demo \
+  --region eu-north-1 \
+  --nodegroup-name microservices-demo-workers \
+  --node-type t3.small \
+  --nodes 2 \
+  --managed
+```
+
+### Step 3 — Install Jenkins on EC2
+```bash
+# SSH into Jenkins EC2
+ssh -i jenkins-key.pem ubuntu@<jenkins-ip>
+
+# Install Java 21
+sudo apt-get install -y openjdk-21-jdk
+
+# Install Docker
+sudo apt-get install -y docker.io
+sudo usermod -aG docker jenkins
+
+# Download and start Jenkins
+sudo mkdir -p /opt/jenkins
+cd /opt/jenkins
+sudo wget https://get.jenkins.io/war-stable/latest/jenkins.war
+sudo java -jar jenkins.war --httpPort=8080
+```
+
+### Step 4 — Configure Jenkins
+- Install plugins: `Pipeline, Git, GitHub Integration, Docker Pipeline`
+- Add credentials: `github-credentials`, `aws-account-id`
+- Create pipeline job pointing to `Jenkinsfile` in this repo
+- Set up GitHub webhook: `http://<jenkins-ip>:8080/github-webhook/`
+
+### Step 5 — Run Pipeline
+```bash
+git push origin main
+# Pipeline triggers automatically via GitHub webhook
+```
+
+### Step 6 — Access Application
+```bash
+kubectl get svc frontend-external -n default
+# Open EXTERNAL-IP in browser
+```
+
+### Step 7 — Setup Monitoring
+```bash
+# SSH into Jenkins EC2
+sudo docker network create monitoring
+
+# Run Prometheus
+sudo docker run -d --name prometheus \
+  --network monitoring -p 9090:9090 \
+  -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml \
+  prom/prometheus
+
+# Run Node Exporter
+sudo docker run -d --name node-exporter \
+  --network monitoring -p 9100:9100 \
+  prom/node-exporter
+
+# Run Grafana
+sudo docker run -d --name grafana \
+  --network monitoring -p 3000:3000 \
+  -e GF_SECURITY_ADMIN_PASSWORD=admin \
+  grafana/grafana
+```
+
+### Step 8 — Destroy Resources (to save costs)
+```bash
+# Delete EKS cluster
+eksctl delete cluster --region=eu-north-1 --name=devops-demo
+
+# Destroy Terraform resources
+cd infrastructure/terraform
+terraform destroy
+```
+
+---
+
+## 💰 AWS Cost Estimate <a name="cost-estimate"></a>
+
+| Resource | Instance Type | Cost |
+|---|---|---|
+| Jenkins EC2 | t3.micro | ~$0.01/hour |
+| EKS Control Plane | — | ~$0.10/hour |
+| EKS Worker Node 1 | t3.small | ~$0.02/hour |
+| EKS Worker Node 2 | t3.small | ~$0.02/hour |
+| ECR Storage | — | ~$0.10/GB/month |
+| **Total while running** | | **~$0.15/hour** |
+
+> 💡 **Cost Tip:** Run `eksctl delete cluster` and `terraform destroy` when not actively using the project. Recreate with one command when needed.
+
+---
+
+## 🎯 Key Learnings
+
+- Provisioning cloud infrastructure with **Terraform as code**
+- Setting up a production-grade **Kubernetes cluster on AWS EKS**
+- Building **automated CI/CD pipelines** with Jenkins
+- **Containerizing microservices** and managing images in ECR
+- Deploying to Kubernetes with **zero-downtime rolling updates**
+- Monitoring infrastructure with **Prometheus and Grafana**
+- Troubleshooting real-world issues:
+  - RAM constraints on t3.micro (solved with swap space)
+  - EKS node networking issues (solved with eksctl)
+  - IAM permissions for Jenkins → EKS access
+  - GPG key issues during Jenkins installation
+
+---
+
+## 👩‍💻 Author <a name="author"></a>
+
+**Rishika Patil** — Cloud & DevOps Engineer
+
+- 💼 [LinkedIn](https://linkedin.com/in/Rishika_Patil)
+- 🐙 [GitHub](https://github.com/rspatil08)
+- 📧 rspatil.010716@gmail.com
+
+---
+
+⭐ If you found this project helpful, please give it a star!
