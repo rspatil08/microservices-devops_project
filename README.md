@@ -43,7 +43,7 @@ This project demonstrates a complete DevOps workflow:
 
 ### DevOps Pipeline Architecture
 
-<img src="devops_pipeline_arch.png" width="400">
+<img src="/docs/img/devops_pipeline_arch.png" width="400">
 
 ---
 
@@ -118,7 +118,7 @@ This project demonstrates a complete DevOps workflow:
 
 ## 🔄 CI/CD Pipeline Flow <a name="cicd-pipeline"></a>
 
-<img src="cicd_pipeline_flow.png" width="400">
+<img src="/docs/img/cicd_pipeline_flow.png" width="400">
 
 ---
 
@@ -157,7 +157,7 @@ Grafana    → http://<jenkins-ip>:3000
 
 ## 📁 Project Structure <a name="project-structure"></a>
 
-<img src="project_structure.png" width="600">
+<img src="/docs/img/project_structure.png" width="600">
 
 ---
 
@@ -267,24 +267,24 @@ terraform destroy
 ## 📸 Screenshots <a name="screenshots"></a>
 
 ### Jenkins CI/CD Pipeline
-<img src="jenkins_pipeline.png" width="100%">
+<img src="/docs/img/jenkins_pipeline.png" width="100%">
 
 ### All Pods Running on EKS
-<img src="running_pods.png" width="100%">
+<img src="/docs/img/running_pods.png" width="100%">
 
 ### Grafana Monitoring Dashboard
-<img src="grafana_dashboard.png" width="100%">
+<img src="/docs/img/grafana_dashboard.png" width="100%">
 
 ### AWS ECR Repositories
-<img src="aws_ecr_11repos1.png" width="100%">
-<img src="aws_ecr_11repos2.png" width="100%">
-<img src="aws_ecr_11repos3.png" width="100%">
+<img src="/docs/img/aws_ecr_11repos1.png" width="100%">
+<img src="/docs/img/aws_ecr_11repos2.png" width="100%">
+<img src="/docs/img/aws_ecr_11repos3.png" width="100%">
 
 ### EKS Cluster
-<img src="aws_eks_cluster.png" width="100%">
+<img src="/docs/img/aws_eks_cluster.png" width="100%">
 
 ### Live Application
-<img src="live_website.png" width="100%">
+<img src="/docs/img/live_website.png" width="100%">
 
 ---
 
