@@ -1,8 +1,20 @@
-# ./kubernetes-manifests
+# Kubernetes Manifests
 
-:warning: Kubernetes manifests provided in this directory are not directly
-deployable to a cluster. They are meant to be used with `skaffold` command to
-insert the correct `image:` tags.
+These manifests deploy the Online Boutique microservices 
+to AWS EKS.
 
-Use the manifests in [/release](/release) directory which are configured with
-pre-built public images.
+## Changes from Original
+- All image URLs updated to point to AWS ECR:
+  `552357224711.dkr.ecr.eu-north-1.amazonaws.com/<service>:latest`
+- Deployed via Jenkins CI/CD pipeline automatically
+
+## Deploy Manually
+```bash
+kubectl apply -f kubernetes-manifests/ --validate=false
+```
+
+## Services Deployed
+- frontend, adservice, cartservice, checkoutservice
+- currencyservice, emailservice, loadgenerator
+- paymentservice, productcatalogservice
+- recommendationservice, shippingservice, redis-cart
