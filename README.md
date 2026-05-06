@@ -14,9 +14,10 @@ End-to-end DevOps pipeline for deploying a cloud-native microservices e-commerce
 - [Infrastructure Details](#infrastructure)
 - [Monitoring](#monitoring)
 - [Project Structure](#project-structure)
-- [Screenshots](#screenshots)
 - [How to Deploy](#how-to-deploy)
+- [Screenshots](#screenshots)
 - [Cost Estimate](#cost-estimate)
+- [Key Learnings](#key-learnings)
 - [Author](#author)
 
 ---
@@ -31,7 +32,7 @@ This project demonstrates a complete DevOps workflow:
 - Application runs on **AWS EKS** (Kubernetes) with zero-downtime deployments
 - System health monitored in real-time via **Prometheus and Grafana**
 
-> **Note:** The application code (Online Boutique) was developed by Google. My contribution was building the complete DevOps infrastructure, CI/CD pipeline, and monitoring stack around it.
+> **Note:** My contribution was building the complete DevOps infrastructure, CI/CD pipeline, and monitoring stack around it.
 
 ---
 
@@ -41,30 +42,8 @@ This project demonstrates a complete DevOps workflow:
 [![Architecture of microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
 
 ### DevOps Pipeline Architecture
-Developer
-│
-│  git push
-▼
-GitHub Repository
-│
-│  webhook trigger (automatic)
-▼
-Jenkins CI/CD (AWS EC2 t3.micro)
-│
-├── Stage 1: Checkout code
-├── Stage 2: Build Docker images (11 services)
-├── Stage 3: Push to AWS ECR
-└── Stage 4: Deploy to AWS EKS
-│
-▼
-AWS EKS Kubernetes Cluster
-├── 2 × t3.small worker nodes
-├── 12 pods running
-└── LoadBalancer → public access
-│
-▼
-Prometheus + Grafana
-└── CPU, Memory, Disk, Network monitoring
+
+<img src="devops_pipeline_arch.png" width="400">
 
 ---
 
@@ -139,36 +118,20 @@ Prometheus + Grafana
 
 ## 🔄 CI/CD Pipeline Flow <a name="cicd-pipeline"></a>
 
-Developer pushes code to GitHub
-↓
-GitHub webhook triggers Jenkins automatically
-↓
-Jenkins pulls latest code from GitHub
-↓
-Jenkins builds Docker image for each microservice
-(sequential builds to optimize memory on t3.micro)
-↓
-Images pushed to AWS ECR
-Tagged as: frontend:17 and frontend:latest
-↓
-Jenkins connects kubectl to EKS cluster
-↓
-kubectl apply — Kubernetes manifests deployed
-↓
-Rolling update with zero downtime ✅
-↓
-New version live for users
-
+<img src="cicd_pipeline_flow.png" width="400">
 
 ---
 
 ## ☁️ Infrastructure Details <a name="infrastructure"></a>
-Cloud Provider:    AWS (eu-north-1 — Stockholm)
-Jenkins Server:    t3.micro EC2 + 2GB swap space
-EKS Worker Nodes:  2 × t3.small
-ECR Repositories:  11 (one per microservice)
-Networking:        VPC with 2 public subnets across 2 AZs
-IAM:               Separate roles for Jenkins and EKS nodes
+
+| Component         | Details                                |
+|-------------------|----------------------------------------|
+| Cloud Provider    | AWS (eu-north-1 — Stockholm)           |
+| Jenkins Server    | t3.micro EC2 + 2GB swap space          |
+| EKS Worker Nodes  | 2 × t3.small                           |
+| ECR Repositories  | 11 (one per microservice)              |
+| Networking        | VPC with 2 public subnets across 2 AZs |
+| IAM               | Separate roles for Jenkins and EKS nodes |
 
 ---
 
@@ -193,53 +156,8 @@ Grafana    → http://<jenkins-ip>:3000
 ---
 
 ## 📁 Project Structure <a name="project-structure"></a>
-microservices-devops-pipeline/
-│
-├── src/                          ← 11 microservices (application code)
-│   ├── frontend/
-│   │   └── Dockerfile
-│   ├── adservice/
-│   │   └── Dockerfile
-│   └── ... (one folder per service)
-│
-├── kubernetes-manifests/         ← Kubernetes deployment YAMLs
-│   ├── frontend.yaml             ← updated to use AWS ECR images
-│   ├── adservice.yaml
-│   └── ... (one per service)
-│
-├── infrastructure/
-│   └── terraform/
-│       ├── main.tf               ← VPC, ECR, IAM, Jenkins EC2
-│       ├── variables.tf          ← configurable variables
-│       ├── outputs.tf            ← output values after apply
-│       └── terraform.tfvars      ← variable values
-│
-├── screenshots/                  ← project screenshots
-├── monitoring/                   ← Grafana dashboard JSON exports
-├── Jenkinsfile                   ← complete CI/CD pipeline definition
-└── README.md
 
----
-
-## 📸 Screenshots <a name="screenshots"></a>
-
-### Jenkins CI/CD Pipeline
-![Jenkins Pipeline](screenshots/jenkins-pipeline.png)
-
-### All Pods Running on EKS
-![Pods Running](screenshots/eks-pods.png)
-
-### Grafana Monitoring Dashboard
-![Grafana](screenshots/grafana-dashboard.png)
-
-### AWS ECR Repositories
-![ECR](screenshots/ecr-repositories.png)
-
-### EKS Cluster
-![EKS](screenshots/eks-cluster.png)
-
-### Live Application
-![Online Boutique](screenshots/online-boutique.png)
+<img src="project_structure.png" width="600">
 
 ---
 
@@ -270,6 +188,8 @@ eksctl create cluster \
   --nodegroup-name microservices-demo-workers \
   --node-type t3.small \
   --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 3 \
   --managed
 ```
 
@@ -342,6 +262,29 @@ eksctl delete cluster --region=eu-north-1 --name=devops-demo
 cd infrastructure/terraform
 terraform destroy
 ```
+---
+
+## 📸 Screenshots <a name="screenshots"></a>
+
+### Jenkins CI/CD Pipeline
+<img src="jenkins_pipeline.png" width="100%">
+
+### All Pods Running on EKS
+<img src="running_pods.png" width="100%">
+
+### Grafana Monitoring Dashboard
+<img src="grafana_dashboard.png" width="100%">
+
+### AWS ECR Repositories
+<img src="aws_ecr_11repos1.png" width="100%">
+<img src="aws_ecr_11repos2.png" width="100%">
+<img src="aws_ecr_11repos3.png" width="100%">
+
+### EKS Cluster
+<img src="aws_eks_cluster.png" width="100%">
+
+### Live Application
+<img src="live_website.png" width="100%">
 
 ---
 
@@ -360,7 +303,7 @@ terraform destroy
 
 ---
 
-## 🎯 Key Learnings
+## 🎯 Key Learnings <a name="key-learnings"></a>
 
 - Provisioning cloud infrastructure with **Terraform as code**
 - Setting up a production-grade **Kubernetes cluster on AWS EKS**
@@ -380,10 +323,8 @@ terraform destroy
 
 **Rishika Patil** — Cloud & DevOps Engineer
 
-- 💼 [LinkedIn](https://linkedin.com/in/Rishika_Patil)
+- 💼 [LinkedIn](https://www.linkedin.com/in/rishika-patil0808/)
 - 🐙 [GitHub](https://github.com/rspatil08)
 - 📧 rspatil.010716@gmail.com
 
 ---
-
-⭐ If you found this project helpful, please give it a star!
